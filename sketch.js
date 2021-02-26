@@ -5,9 +5,8 @@ var gameState= play;
 var koya, koyaImage;
 var pillow ,pillowImage, obstacle, obstacleImage;
 var ground, invisibleGround, groundImage;
-var gameOver, gameOverImg;
 var pillowGroup, obstacleGroup;
-var score;
+var runningScore, score;
 
 function preload(){
   
@@ -15,7 +14,7 @@ function preload(){
   pillowImage = loadImage("pillow.png");
   obstacleImage = loadImage("fireball.png");
   groundImage= loadImage("forestImg.jpg");
-  gameOverImg= loadImage("gameover.jpg");
+ 
 }
 
 function setup() {
@@ -37,22 +36,27 @@ function setup() {
   invisibleGround.x=invisibleGround.width/2;
   invisibleGround.visible= false;
 
-  //gameOver= createSprite(400,100,1,1);
-  //gameOver.addImage(gameOverImg);
-  //gameOver.scale= 0.9;
-
   obstacleGroup = createGroup();
   pillowGroup = createGroup();
 
   score= 0;
+  runningScore= 0;
 }
 
 
 function draw() {
-  background(225);
+  background(0);
     
   if (gameState=== play){
-   // gameOver.visible= false;
+
+    ground.velocityX= -(4+3* runningScore/100)
+
+    runningScore= runningScore+ Math.round(getFrameRate()/60);
+
+    if(score>0 && score%100=== 0){
+
+    }
+ 
      if (invisibleGround.x < 0){
    invisibleGround.x= invisibleGround.width/2;
   }
@@ -84,30 +88,49 @@ function draw() {
     if (keyDown("space")&& koya.y>= 200){
       koya.velocityY= -12;
     }
-    koya.velocityY = koya.velocityY + 0.5;
+    koya.velocityY = koya.velocityY + 0.8;
     
     koya.collide(invisibleGround);
     
     if (koya.isTouching(obstacleGroup)){
+      obstacleGroup.destroyEach();
       gameState= end;
     }
 }
-  
-  else {
-    (gameState=== end)
-    background("black");
-    reset();
-  }  
-    
+
+else if (gameState=== end){
+
+  ground.velocityX = 0;
+ 
+  koya.destroy();
+ 
+  obstacleGroup.setVelocityXEach(0);
+  pillowGroup.setVelocityXEach(0);
+ 
+   koya.velocityX = 0;
+ }
+
   cushion();
   obstacles();
   drawSprites();
   
-  
+  stroke("black");
+  textSize(30);
+  fill("yellow");
+  text ("Running score:" + runningScore, 50,50);
+
   stroke("black");
   textSize(30);
   fill("yellow");
   text ("Score:" + score, 400,50);
+
+  if (gameState=== end){
+    background(0);
+    stroke("yellow");
+    fill("white");
+    textSize(50);
+    text("GAME OVER!", 100, 300);
+  }
 }
 
 function cushion(){
@@ -137,20 +160,4 @@ function obstacles(){
     fireBall.lifetime= 150;
     obstacleGroup.add(fireBall);
   }
-}
-function reset(){
- // background("black");
- //gameOver.visible= true;
-
-  ground.velocityX = 0;
-  koya.velocityY = 0;
-  
-  obstacleGroup.setVelocityXEach(0);
-  pillowGroup.setVelocityXEach(0);
-
-  pillowImage.visible= false;
-  obstacleImage.visible= false;
-  
-  fill("white")
-  text("GAME OVER!", 300,300);
 }
